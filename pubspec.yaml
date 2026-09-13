@@ -1,0 +1,28 @@
+name: transcribe_app
+description: "Diarized transcription via ElevenLabs Scribe (auto language, audio/video) - DartNative + App Intents"
+publish_to: 'none'
+license: BSD-3-Clause
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.12.0-192.0.dev
+
+# Plain version deps: `dn pub get` resolves DartNative packages from your
+# installed SDK (closed resolution) - no registry setup, works offline.
+dependencies:
+  # Declares a Flutter/DartNative app so VS Code Dart-Code uses
+  # `flutter run` (via ~/zero) instead of plain `dart run`.
+  flutter:
+    sdk: flutter
+  dartnative: ^1.0.0
+  dartnative_ios: ^1.0.0
+  dartnative_android: ^1.0.0
+  dartnative_skia: ^1.0.0
+  dartnative_share: ^1.0.0
+  ffi: ^2.1.0
+
+dev_dependencies:
+  lints: ^6.0.0
+
+dartnative_skia:
+  variant: full

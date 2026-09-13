@@ -1,0 +1,19 @@
+{
+  // DartNative SDK path is assumed at ~/zero.
+  "dart.flutterSdkPath": "${userHome}/zero",
+  "dart.sdkPath": "${userHome}/zero/bin/cache/dart-sdk",
+
+  // Find Flutter/DN projects even if a parent folder is opened.
+  "dart.projectSearchDepth": 10,
+
+  // Let `dn pub get` own resolution (DartNative packages ship with the SDK).
+  "dart.runPubGetOnPubspecChanges": "never",
+
+  // Terminals in this workspace should prefer `dn` / zero flutter.
+  "terminal.integrated.env.osx": {
+    "PATH": "${userHome}/zero/bin:${env:PATH}"
+  },
+
+  // Ctrl+F5 / Run Without Debugging should use the dn launch config.
+  "debug.internalConsoleOptions": "neverOpen"
+}
