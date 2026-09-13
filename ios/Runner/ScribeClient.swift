@@ -128,7 +128,7 @@ enum ScribeClient {
         SecItemDelete(query as CFDictionary)
         var attributes = query
         attributes[kSecValueData as String] = Data(key.trimmingCharacters(in: .whitespacesAndNewlines).utf8)
-        attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
+        attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
         let status = SecItemAdd(attributes as CFDictionary, nil)
         return status == errSecSuccess ? 0 : status
     }
