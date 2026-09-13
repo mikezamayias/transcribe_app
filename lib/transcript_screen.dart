@@ -174,7 +174,6 @@ class _SpeakerTurnRow extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           turn.text,
-          selectable: true,
           style: TextStyle(
             color: palette.ink,
             fontSize: 17,
