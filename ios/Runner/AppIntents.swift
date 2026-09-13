@@ -35,12 +35,19 @@ struct TranscribeRecordingIntent: AppIntent, ProgressReportingIntent {
             .appendingPathComponent("transcribe-intent-\(UUID().uuidString.lowercased())-\(name)")
         try audioFile.data.write(to: url)
 
-        let result = try await ScribeClient.transcribe(fileURL: url, speakers: nil) { fraction in
-            let units = min(max(Int64(fraction * 100), 0), 99)
-            if units > self.progress.completedUnitCount {
-                self.progress.completedUnitCount = units
-                self.progress.localizedDescription = "Uploading…"
+        let result: TranscriptionResult
+        do {
+            result = try await ScribeClient.transcribe(fileURL: url, speakers: nil) { fraction in
+                let units = min(max(Int64(fraction * 100), 0), 99)
+                if units > self.progress.completedUnitCount {
+                    self.progress.completedUnitCount = units
+                    self.progress.localizedDescription = "Uploading…"
+                }
             }
+        } catch {
+            NSLog("[Transcribe] intent failed: \(error)")
+            if error is LocalizedError { throw error }
+            throw ScribeClient.ScribeError.media("\(error)")
         }
         progress.completedUnitCount = 100
         progress.localizedDescription = "Done"
