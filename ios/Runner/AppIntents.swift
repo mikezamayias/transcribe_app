@@ -33,7 +33,11 @@ struct TranscribeRecordingIntent: AppIntent, ProgressReportingIntent {
         let name = audioFile.filename.isEmpty ? "recording.m4a" : audioFile.filename
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("transcribe-intent-\(UUID().uuidString.lowercased())-\(name)")
-        try audioFile.data.write(to: url)
+        do {
+            try audioFile.data.write(to: url)
+        } catch {
+            throw ScribeClient.ScribeError.media("Could not save recording: \(error.localizedDescription)")
+        }
 
         let result: TranscriptionResult
         do {
@@ -45,7 +49,8 @@ struct TranscribeRecordingIntent: AppIntent, ProgressReportingIntent {
                 }
             }
         } catch {
-            NSLog("[Transcribe] intent failed: \(error)")
+            NSLog("[Transcribe] intent failed: %@", "\(error)")
+            // Shortcuts shows "unknown error" for anything without a description.
             if error is LocalizedError { throw error }
             throw ScribeClient.ScribeError.media("\(error)")
         }

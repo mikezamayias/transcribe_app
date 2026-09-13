@@ -376,6 +376,15 @@ enum ScribeClient {
         return URLSession(configuration: config, delegate: sessionDelegate, delegateQueue: nil)
     }()
 
+    /// For App Intents. The intent runs while the app is in the background,
+    /// where background-session tasks are discretionary and may never start.
+    private static let foregroundSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 3600
+        config.timeoutIntervalForResource = 3600
+        return URLSession(configuration: config, delegate: sessionDelegate, delegateQueue: nil)
+    }()
+
     static func reportProgress(_ fraction: Double) {
         lock.lock()
         let handler = currentProgressHandler
@@ -446,7 +455,8 @@ enum ScribeClient {
     private static func performTranscription(
         fileURL: URL,
         speakers: Int?,
-        progress: ((Double) -> Void)?
+        progress: ((Double) -> Void)?,
+        background: Bool
     ) async throws -> (result: TranscriptionResult, cleanup: () -> Void) {
         lock.lock()
         if isTranscribing {
@@ -500,19 +510,24 @@ enum ScribeClient {
             request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
             request.timeoutInterval = 3600
 
-            let result: TranscriptionResult = try await withCheckedThrowingContinuation { continuation in
-                lock.lock()
-                if Task.isCancelled {
+            let session = background ? backgroundSession : foregroundSession
+            let result: TranscriptionResult = try await withTaskCancellationHandler {
+                try await withCheckedThrowingContinuation { continuation in
+                    lock.lock()
+                    if Task.isCancelled {
+                        lock.unlock()
+                        continuation.resume(throwing: CancellationError())
+                        return
+                    }
+                    currentContinuation = continuation
+                    let task = session.uploadTask(with: request, fromFile: bodyURL)
+                    currentUploadTask = task
                     lock.unlock()
-                    continuation.resume(throwing: CancellationError())
-                    return
-                }
-                currentContinuation = continuation
-                let task = backgroundSession.uploadTask(with: request, fromFile: bodyURL)
-                currentUploadTask = task
-                lock.unlock()
 
-                task.resume()
+                    task.resume()
+                }
+            } onCancel: {
+                cancel()
             }
 
             let cleanup: () -> Void = {
@@ -555,7 +570,8 @@ enum ScribeClient {
         let (result, cleanup) = try await performTranscription(
             fileURL: fileURL,
             speakers: speakers,
-            progress: progress
+            progress: progress,
+            background: false
         )
         defer { cleanup() }
         return result
@@ -580,7 +596,8 @@ enum ScribeClient {
                 let (result, cleanup) = try await performTranscription(
                     fileURL: fileURL,
                     speakers: speakers,
-                    progress: { frac in progress?(frac) }
+                    progress: { frac in progress?(frac) },
+                    background: true
                 )
                 cleanupAction = cleanup
                 let json = result.toJSONString()
