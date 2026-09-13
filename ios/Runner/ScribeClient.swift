@@ -50,6 +50,11 @@ struct TranscriptionResult {
         turns.map(\.line).joined(separator: "\n\n")
     }
 
+    /// Spoken words only, no timestamps or speaker labels. Shortcut output.
+    var spokenText: String {
+        turns.map(\.text).joined(separator: "\n\n")
+    }
+
     func toJSONString() -> String {
         let dict: [String: Any] = [
             "turns": turns.map { $0.toDict() },

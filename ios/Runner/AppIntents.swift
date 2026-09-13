@@ -11,8 +11,16 @@ struct TranscribeRecordingIntent: AppIntent, ProgressReportingIntent {
     )
     static var openAppWhenRun: Bool = false
 
-    @Parameter(title: "Media File", description: "Audio or video. Video is converted to audio first.")
+    @Parameter(
+        title: "Media File",
+        description: "Audio or video. Video is converted to audio first.",
+        supportedContentTypes: [.audio, .movie]
+    )
     var audioFile: IntentFile
+
+    static var parameterSummary: some ParameterSummary {
+        Summary("Transcribe \(\.$audioFile)")
+    }
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
         progress.totalUnitCount = 100
@@ -41,7 +49,7 @@ struct TranscribeRecordingIntent: AppIntent, ProgressReportingIntent {
         progress.completedUnitCount = 100
         progress.localizedDescription = "Done"
 
-        let text = result.plainText
+        let text = result.spokenText
         return .result(value: text, dialog: IntentDialog("\(text)"))
     }
 }
