@@ -27,17 +27,13 @@ struct TranscribeRecordingIntent: AppIntent, ProgressReportingIntent {
         progress.completedUnitCount = 0
         progress.localizedDescription = "Preparing media…"
 
-        // Files picked from Files arrive with a URL. Files produced by another
-        // action (Record Audio, Select Photos) arrive as in-memory data only.
-        let url: URL
-        if let fileURL = audioFile.fileURL {
-            url = fileURL
-        } else {
-            let name = audioFile.filename.isEmpty ? "recording.m4a" : audioFile.filename
-            url = FileManager.default.temporaryDirectory
-                .appendingPathComponent("transcribe-intent-\(UUID().uuidString.lowercased())-\(name)")
-            try audioFile.data.write(to: url)
-        }
+        // Always work from the bytes Shortcuts hands over. The URL it provides
+        // is not reliable: on iOS 27 it carries a /.nofollow/ prefix that is not
+        // a real path, and files from Record Audio have no URL at all.
+        let name = audioFile.filename.isEmpty ? "recording.m4a" : audioFile.filename
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("transcribe-intent-\(UUID().uuidString.lowercased())-\(name)")
+        try audioFile.data.write(to: url)
 
         let result = try await ScribeClient.transcribe(fileURL: url, speakers: nil) { fraction in
             let units = min(max(Int64(fraction * 100), 0), 99)
