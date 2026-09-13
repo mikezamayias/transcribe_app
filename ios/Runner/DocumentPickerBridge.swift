@@ -6,7 +6,7 @@ import UIKit
 /// C ABI for Dart: open a document picker for audio **or** video.
 /// Videos are exported to a temporary `.m4a` before the path is returned,
 /// so ElevenLabs always receives audio.
-typealias TranscribePickAudioCallback = @convention(c) (UnsafePointer<CChar>?) -> Void
+public typealias TranscribePickAudioCallback = @convention(c) (UnsafePointer<CChar>?) -> Void
 
 private final class DocumentPickerCoordinator: NSObject, UIDocumentPickerDelegate {
     static let shared = DocumentPickerCoordinator()
@@ -41,8 +41,8 @@ private final class DocumentPickerCoordinator: NSObject, UIDocumentPickerDelegat
     }
 }
 
-@_cdecl("transcribe_pick_audio")
-func transcribe_pick_audio(_ cb: TranscribePickAudioCallback) {
+@_used @_cdecl("transcribe_pick_audio")
+public func transcribe_pick_audio(_ cb: TranscribePickAudioCallback) {
     DispatchQueue.main.async {
         DocumentPickerCoordinator.shared.callback = cb
         guard

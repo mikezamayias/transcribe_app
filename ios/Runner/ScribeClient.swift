@@ -704,23 +704,28 @@ final class ScribeSessionDelegate: NSObject, URLSessionTaskDelegate, URLSessionD
 }
 
 // MARK: - C ABI Exports
+//
+// These must be `public` (and `@_used`): in optimised whole-module builds the
+// Swift compiler gives internal functions hidden visibility, so they vanish from
+// the export trie and Dart's `DynamicLibrary.process().lookupFunction` fails at
+// runtime in release and profile builds while debug builds work.
 
-typealias TranscribeProgressCallback = @convention(c) (Double) -> Void
-typealias TranscribeDoneCallback = @convention(c) (UnsafePointer<CChar>?) -> Void
-typealias TranscribeOpenFileCallback = @convention(c) (UnsafePointer<CChar>?) -> Void
+public typealias TranscribeProgressCallback = @convention(c) (Double) -> Void
+public typealias TranscribeDoneCallback = @convention(c) (UnsafePointer<CChar>?) -> Void
+public typealias TranscribeOpenFileCallback = @convention(c) (UnsafePointer<CChar>?) -> Void
 
-@_cdecl("transcribe_has_api_key")
-func transcribe_has_api_key() -> Int32 {
+@_used @_cdecl("transcribe_has_api_key")
+public func transcribe_has_api_key() -> Int32 {
     return (try? ScribeClient.apiKey()) != nil ? 1 : 0
 }
 
-@_cdecl("transcribe_set_api_key")
-func transcribe_set_api_key(_ key: UnsafePointer<CChar>?) -> Int32 {
+@_used @_cdecl("transcribe_set_api_key")
+public func transcribe_set_api_key(_ key: UnsafePointer<CChar>?) -> Int32 {
     return ScribeClient.setApiKey(key)
 }
 
-@_cdecl("transcribe_start")
-func transcribe_start(
+@_used @_cdecl("transcribe_start")
+public func transcribe_start(
     _ path: UnsafePointer<CChar>?,
     _ speakers: Int32,
     _ progress: TranscribeProgressCallback?,
@@ -740,16 +745,16 @@ func transcribe_start(
     )
 }
 
-@_cdecl("transcribe_cancel")
-func transcribe_cancel() {
+@_used @_cdecl("transcribe_cancel")
+public func transcribe_cancel() {
     ScribeClient.cancel()
 }
 
-@_cdecl("transcribe_set_open_file_cb")
-func transcribe_set_open_file_cb(_ cb: TranscribeOpenFileCallback?) {
+@_used @_cdecl("transcribe_set_open_file_cb")
+public func transcribe_set_open_file_cb(_ cb: TranscribeOpenFileCallback?) {
     ScribeClient.setOpenFileCallback(cb)
 }
 
-@_cdecl("transcribe_free_string")
-func transcribe_free_string(_ ptr: UnsafeMutablePointer<CChar>?) { free(ptr) }
+@_used @_cdecl("transcribe_free_string")
+public func transcribe_free_string(_ ptr: UnsafeMutablePointer<CChar>?) { free(ptr) }
 
