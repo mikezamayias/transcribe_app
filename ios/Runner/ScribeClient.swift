@@ -749,3 +749,7 @@ func transcribe_cancel() {
 func transcribe_set_open_file_cb(_ cb: TranscribeOpenFileCallback?) {
     ScribeClient.setOpenFileCallback(cb)
 }
+
+@_cdecl("transcribe_free_string")
+func transcribe_free_string(_ ptr: UnsafeMutablePointer<CChar>?) { free(ptr) }
+

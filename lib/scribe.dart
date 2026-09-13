@@ -39,6 +39,9 @@ typedef _OpenFileCbNative = Void Function(Pointer<Utf8>);
 typedef _SetOpenFileCbNative = Void Function(Pointer<NativeFunction<_OpenFileCbNative>>);
 typedef _SetOpenFileCbDart = void Function(Pointer<NativeFunction<_OpenFileCbNative>>);
 
+typedef _TranscribeFreeStringNative = Void Function(Pointer<Utf8>);
+typedef _TranscribeFreeStringDart = void Function(Pointer<Utf8>);
+
 final DynamicLibrary _dylib = DynamicLibrary.process();
 
 final _pickAudioNative =
@@ -53,6 +56,10 @@ final _transcribeCancelNative =
     _dylib.lookupFunction<_TranscribeCancelNative, _TranscribeCancelDart>('transcribe_cancel');
 final _setOpenFileCbNative =
     _dylib.lookupFunction<_SetOpenFileCbNative, _SetOpenFileCbDart>('transcribe_set_open_file_cb');
+final _transcribeFreeString =
+    _dylib.lookupFunction<_TranscribeFreeStringNative, _TranscribeFreeStringDart>(
+  'transcribe_free_string',
+);
 
 NativeCallable<_OpenFileCbNative>? _openFileCallable;
 
@@ -68,7 +75,7 @@ Future<String?> pickAudio() {
         try {
           completer.complete(ptr.toDartString());
         } finally {
-          malloc.free(ptr);
+          _transcribeFreeString(ptr);
         }
       }
     } catch (e, st) {
@@ -139,7 +146,7 @@ Future<TranscriptResult> transcribe(
           completer.completeError(const TranscribeError('Invalid response format'));
         }
       } finally {
-        malloc.free(jsonPtr);
+        _transcribeFreeString(jsonPtr);
       }
     } catch (e, st) {
       completer.completeError(e, st);
@@ -179,7 +186,7 @@ void onOpenFile(void Function(String path) cb) {
       try {
         cb(ptr.toDartString());
       } finally {
-        malloc.free(ptr);
+        _transcribeFreeString(ptr);
       }
     }
   });

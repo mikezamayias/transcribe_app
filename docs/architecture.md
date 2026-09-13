@@ -23,3 +23,4 @@ Dart communicates with Swift via C ABI exports (`@_cdecl`) using `DynamicLibrary
 - `transcribe_set_open_file_cb(cb)`: Registers callback for files opened via iOS share sheet.
 
 Swift is the sole reader/writer of the iOS Keychain and handles background network/audio processing.
+strings passed to Dart callbacks are allocated by Swift and returned with `transcribe_free_string` after Dart has read them.
