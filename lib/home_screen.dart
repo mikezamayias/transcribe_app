@@ -1,11 +1,8 @@
 import 'package:dartnative/dartnative.dart';
 
 import 'scribe.dart';
+import 'theme.dart';
 import 'transcript_screen.dart';
-
-const Color _kCanvas = Color(0xFFF2F2F7);
-const Color _kInk = Color(0xFF111111);
-const Color _kMuted = Color(0xFF6B6B70);
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -146,8 +143,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = Palette.of(context);
     return Scaffold(
-      backgroundColor: _kCanvas,
+      backgroundColor: palette.canvas,
       appBar: AppBar(
         title: const Text('Transcribe'),
         actions: [
@@ -160,15 +158,15 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: SafeArea(
         child: _running
-            ? _buildRunningView()
+            ? _buildRunningView(palette)
             : _filePath != null
-                ? _buildPickedView()
-                : _buildIdleView(),
+                ? _buildPickedView(palette)
+                : _buildIdleView(palette),
       ),
     );
   }
 
-  Widget _buildIdleView() {
+  Widget _buildIdleView(Palette palette) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -181,11 +179,11 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: _pickAudio,
             ),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Or share a recording to Transcribe from Voice Memos or Files.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: _kMuted,
+                color: palette.muted,
                 fontSize: 13,
               ),
             ),
@@ -195,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildPickedView() {
+  Widget _buildPickedView(Palette palette) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -206,19 +204,19 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               _fileName ?? '',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: _kInk,
+              style: TextStyle(
+                color: palette.ink,
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
             ),
             if (_convertedFromVideo) ...[
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Converted to M4A',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: _kMuted,
+                  color: palette.muted,
                   fontSize: 13,
                 ),
               ),
@@ -241,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildRunningView() {
+  Widget _buildRunningView(Palette palette) {
     final String statusText;
     if (_cancelling) {
       statusText = 'Cancelling…';
@@ -262,8 +260,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 _fileName!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: _kInk,
+                style: TextStyle(
+                  color: palette.ink,
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -277,8 +275,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               statusText,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: _kMuted,
+              style: TextStyle(
+                color: palette.muted,
                 fontSize: 13,
               ),
             ),
@@ -324,6 +322,7 @@ class _ApiKeySheetState extends State<_ApiKeySheet> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = Palette.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       child: Column(
@@ -340,10 +339,10 @@ class _ApiKeySheetState extends State<_ApiKeySheet> {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Stored in the iOS Keychain on this device.',
             style: TextStyle(
-              color: _kMuted,
+              color: palette.muted,
               fontSize: 13,
             ),
           ),

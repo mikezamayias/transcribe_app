@@ -9,13 +9,6 @@ void main() {
   DartNativeLogger.run(
     () {
       DartNativePluginRegistrant.registerAll();
-      SystemChrome.defaultStyle = const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarBrightness: Brightness.light,
-        statusBarIconBrightness: Brightness.dark,
-        systemNavigationBarColor: Colors.transparent,
-        systemNavigationBarIconBrightness: Brightness.dark,
-      );
       runApp(const App(home: HomeScreen()));
     },
     verbose: isDebug,

@@ -1,11 +1,8 @@
 import 'package:dartnative/dartnative.dart';
 import 'package:dartnative_share/dartnative_share.dart';
 
+import 'theme.dart';
 import 'transcript_model.dart';
-
-const Color _kCanvas = Color(0xFFF2F2F7);
-const Color _kInk = Color(0xFF111111);
-const Color _kMuted = Color(0xFF6B6B70);
 
 const List<Color> _kSpeakerPalette = [
   Color(0xFF007AFF), // system blue
@@ -26,16 +23,16 @@ class TranscriptScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = Palette.of(context);
     return Scaffold(
-      brightness: Brightness.light,
-      backgroundColor: _kCanvas,
+      backgroundColor: palette.canvas,
       appBar: AppBar(
         title: Text(
           fileName,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: _kInk,
+          style: TextStyle(
+            color: palette.ink,
             fontSize: 17,
             fontWeight: FontWeight.bold,
           ),
@@ -58,19 +55,19 @@ class TranscriptScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
               child: Text(
                 _formatMeta(result),
-                style: const TextStyle(
-                  color: _kMuted,
+                style: TextStyle(
+                  color: palette.muted,
                   fontSize: 13,
                 ),
               ),
             ),
             Expanded(
               child: result.turns.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         'No speech detected.',
                         style: TextStyle(
-                          color: _kMuted,
+                          color: palette.muted,
                           fontSize: 13,
                         ),
                       ),
@@ -124,6 +121,7 @@ class _SpeakerTurnRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = Palette.of(context);
     final paletteIndex = turn.index >= 0 ? (turn.index % 4) : 0;
     final speakerNumber = turn.index >= 0 ? '${turn.index + 1}' : '?';
 
@@ -154,8 +152,8 @@ class _SpeakerTurnRow extends StatelessWidget {
             Expanded(
               child: Text(
                 turn.displayName,
-                style: const TextStyle(
-                  color: _kInk,
+                style: TextStyle(
+                  color: palette.ink,
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -166,8 +164,8 @@ class _SpeakerTurnRow extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               turn.timestamp,
-              style: const TextStyle(
-                color: _kMuted,
+              style: TextStyle(
+                color: palette.muted,
                 fontSize: 13,
               ),
             ),
@@ -177,8 +175,8 @@ class _SpeakerTurnRow extends StatelessWidget {
         Text(
           turn.text,
           selectable: true,
-          style: const TextStyle(
-            color: _kInk,
+          style: TextStyle(
+            color: palette.ink,
             fontSize: 17,
             height: 1.4,
           ),
