@@ -14,19 +14,24 @@ struct TranscribeRecordingIntent: AppIntent, ProgressReportingIntent {
     @Parameter(title: "Media File", description: "Audio or video. Video is converted to audio first.")
     var audioFile: IntentFile
 
-    @Parameter(title: "Speakers", description: "Optional known speaker count.")
-    var speakers: Int?
-
     func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
         progress.totalUnitCount = 100
         progress.completedUnitCount = 0
         progress.localizedDescription = "Preparing media…"
 
-        guard let url = audioFile.fileURL else {
-            throw ScribeClient.ScribeError.empty
+        // Files picked from Files arrive with a URL. Files produced by another
+        // action (Record Audio, Select Photos) arrive as in-memory data only.
+        let url: URL
+        if let fileURL = audioFile.fileURL {
+            url = fileURL
+        } else {
+            let name = audioFile.filename.isEmpty ? "recording.m4a" : audioFile.filename
+            url = FileManager.default.temporaryDirectory
+                .appendingPathComponent("transcribe-intent-\(UUID().uuidString.lowercased())-\(name)")
+            try audioFile.data.write(to: url)
         }
 
-        let result = try await ScribeClient.transcribe(fileURL: url, speakers: speakers) { fraction in
+        let result = try await ScribeClient.transcribe(fileURL: url, speakers: nil) { fraction in
             let units = min(max(Int64(fraction * 100), 0), 99)
             if units > self.progress.completedUnitCount {
                 self.progress.completedUnitCount = units
@@ -36,7 +41,8 @@ struct TranscribeRecordingIntent: AppIntent, ProgressReportingIntent {
         progress.completedUnitCount = 100
         progress.localizedDescription = "Done"
 
-        return .result(value: result.plainText, dialog: IntentDialog("Transcription ready"))
+        let text = result.plainText
+        return .result(value: text, dialog: IntentDialog("\(text)"))
     }
 }
 
